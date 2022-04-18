@@ -5,8 +5,8 @@ using System.Net;
 using System.Text;
 using System.Runtime.InteropServices;
 
-IntPtr h = Process.GetCurrentProcess().MainWindowHandle;
-ShowWindow(h, 0);
+//IntPtr h = Process.GetCurrentProcess().MainWindowHandle;
+//ShowWindow(h, 0);
 
 //Программа
 HttpClient client = new HttpClient();
@@ -36,9 +36,9 @@ void Run()
 void GetProcesses(object sender, ElapsedEventArgs e)
 {
     timer.Stop();
-    //Console.ForegroundColor = ConsoleColor.Blue;
-    //Console.WriteLine("Find new");
-    //Console.ResetColor();
+    Console.ForegroundColor = ConsoleColor.Blue;
+    Console.WriteLine("Find new");
+    Console.ResetColor();
     var tmp = Process.GetProcesses().Where(p => p.MainWindowHandle != IntPtr.Zero && !String.IsNullOrEmpty(p.MainWindowTitle)).ToList();
     var except = new List<Process>();
     foreach (var proc in tmp)
@@ -56,10 +56,10 @@ void GetProcesses(object sender, ElapsedEventArgs e)
         catch (Exception exc)
         {
             t = exc.Message;
-            //    Console.ForegroundColor = ConsoleColor.Red;
+            Console.ForegroundColor = ConsoleColor.Red;
         }
-        //Console.WriteLine($"New: {proc.ProcessName} {t}");
-        //Console.ResetColor();
+        Console.WriteLine($"New: {proc.ProcessName} {t}");
+        Console.ResetColor();
     }
     processes.AddRange(except);
     timer.Start();
@@ -76,18 +76,19 @@ void ProcExited(object sender, EventArgs e)
     {
         code = SendData(proc.ProcessName, proc.StartTime.ToString("yyyy-MM-ddTHH:mm:ssZ"), proc.ExitTime.ToString("yyyy-MM-ddTHH:mm:ssZ"), proc.MainWindowTitle);
         endTime = proc.ExitTime.ToString();
-        //if ((int)code >= 200 && (int)code <= 299) {
-        //    Console.ForegroundColor = ConsoleColor.Green;
-        //}
-        //else Console.ForegroundColor = ConsoleColor.Red;
+        if ((int)code >= 200 && (int)code <= 299)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+        }
+        else Console.ForegroundColor = ConsoleColor.Red;
     }
     catch (Exception exc)
     {
         endTime = exc.Message;
-        //Console.ForegroundColor = ConsoleColor.Red;
+        Console.ForegroundColor = ConsoleColor.Red;
     }
-    //Console.WriteLine($"Dead: {proc.ProcessName} ({proc.StartTime} - {endTime}) {code} ({proc.MainWindowTitle})");
-    //Console.ResetColor();
+    Console.WriteLine($"Dead: {proc.ProcessName} ({proc.StartTime} - {endTime}) {code} ({proc.MainWindowTitle})");
+    Console.ResetColor();
 }
 
 //Отправка данных на сервер
@@ -109,5 +110,5 @@ bool CheckStart()
 }
 
 //
-[DllImport("user32.dll")]
-static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+//[DllImport("user32.dll")]
+//static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
