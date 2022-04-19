@@ -25,7 +25,7 @@ void Run()
     //Настройки таймера для счиьывания
     timer.Interval = 2000;
     timer.AutoReset = true;
-    timer.Elapsed += new ElapsedEventHandler(GetProcesses);
+    timer.Elapsed += GetProcesses;
     timer.Start();
 
     //Что бы приложение не закрывалось
@@ -36,29 +36,30 @@ void Run()
 void GetProcesses(object sender, ElapsedEventArgs e)
 {
     timer.Stop();
-    Console.ForegroundColor = ConsoleColor.Blue;
-    Console.WriteLine("Find new");
-    Console.ResetColor();
-    var tmp = Process.GetProcesses().Where(p => p.MainWindowHandle != IntPtr.Zero && !String.IsNullOrEmpty(p.MainWindowTitle)).ToList();
+    //var tmp = Process.GetProcesses().Where(p => p.MainWindowHandle != IntPtr.Zero && !String.IsNullOrEmpty(p.MainWindowTitle)).ToList();
+    //var tmp = Process.GetProcesses().Where(p => p.MainWindowHandle != IntPtr.Zero).ToList();
+    var tmp = Process.GetProcesses().ToList();
     var except = new List<Process>();
     foreach (var proc in tmp)
     {
         if (processes.FindIndex(p => p.ProcessName == proc.ProcessName) == -1) except.Add(proc);
     }
+    Console.ForegroundColor = ConsoleColor.Blue;
+    Console.WriteLine($"Find new: {except.Count}");
+    Console.ResetColor();
     foreach (var proc in except)
     {
-        string t = "";
         try
         {
             proc.EnableRaisingEvents = true;
-            proc.Exited += new EventHandler(ProcExited);
+            proc.Exited += ProcExited;
+            Console.WriteLine($"New: {proc.Id} {proc.ProcessName} ({proc.StartTime})");
         }
         catch (Exception exc)
         {
-            t = exc.Message;
             Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"New: {proc.Id} {proc.ProcessName} ({exc.Message})");
         }
-        Console.WriteLine($"New: {proc.ProcessName} {t}");
         Console.ResetColor();
     }
     processes.AddRange(except);
@@ -70,24 +71,22 @@ void ProcExited(object sender, EventArgs e)
 {
     Process proc = (Process)sender;
     processes.Remove(proc);
-    string endTime = "";
     HttpStatusCode code = HttpStatusCode.PartialContent;
     try
     {
-        code = SendData(proc.ProcessName, proc.StartTime.ToString("yyyy-MM-ddTHH:mm:ssZ"), proc.ExitTime.ToString("yyyy-MM-ddTHH:mm:ssZ"), proc.MainWindowTitle);
-        endTime = proc.ExitTime.ToString();
+        code = SendData(proc.ProcessName, proc.StartTime.ToString("yyyy-MM-ddTHH:mm:ssZ"), DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssZ"), proc.MainWindowTitle);
         if ((int)code >= 200 && (int)code <= 299)
         {
             Console.ForegroundColor = ConsoleColor.Green;
         }
         else Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"Dead: {proc.Id} {proc.ProcessName} {code}");
     }
     catch (Exception exc)
     {
-        endTime = exc.Message;
         Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"Dead: {proc.Id} {proc.ProcessName} ({code} | {exc.Message})");
     }
-    Console.WriteLine($"Dead: {proc.ProcessName} ({proc.StartTime} - {endTime}) {code} ({proc.MainWindowTitle})");
     Console.ResetColor();
 }
 
