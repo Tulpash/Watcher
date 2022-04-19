@@ -53,7 +53,7 @@ void GetProcesses(object sender, ElapsedEventArgs e)
         {
             proc.EnableRaisingEvents = true;
             proc.Exited += ProcExited;
-            Console.WriteLine($"New: {proc.Id} {proc.ProcessName} ({proc.StartTime})");
+            Console.WriteLine($"New: {proc.Id} {proc.ProcessName} {proc.StartTime} {proc.HasExited}");
         }
         catch (Exception exc)
         {
@@ -85,7 +85,7 @@ void ProcExited(object sender, EventArgs e)
     catch (Exception exc)
     {
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"Dead: {proc.Id} {proc.ProcessName} ({code} | {exc.Message})");
+        Console.WriteLine($"Dead: {proc.Id} {proc.ProcessName} {code} ({exc.Message})");
     }
     Console.ResetColor();
 }
