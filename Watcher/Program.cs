@@ -36,8 +36,6 @@ void Run()
 void GetProcesses(object sender, ElapsedEventArgs e)
 {
     timer.Stop();
-    //var tmp = Process.GetProcesses().Where(p => p.MainWindowHandle != IntPtr.Zero && !String.IsNullOrEmpty(p.MainWindowTitle)).ToList();
-    //var tmp = Process.GetProcesses().Where(p => p.MainWindowHandle != IntPtr.Zero).ToList();
     var tmp = Process.GetProcesses().ToList();
     var except = new List<Process>();
     foreach (var proc in tmp)
